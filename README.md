@@ -4,6 +4,7 @@
 This repository contains a simple bot project that interacts with users. The bot is designed to perform specific tasks and respond to user inputs.
 
 ### Files
+- **commands.gs**: This file contains the command handlers for the bot.
 - **bot_simple.gs**: This is the main script that contains the bot's logic and functionality.
 - **README.md**: This file provides an overview of the project and its contents.
 
@@ -20,7 +21,7 @@ This repository contains a simple bot project that interacts with users. The bot
 ## Usage
 - To run the bot, use the following command:
    ```bash
-   node bot_simple.gs
+   node main.gs
    ```
 
 ## License
