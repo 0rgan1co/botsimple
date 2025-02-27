@@ -4,7 +4,7 @@
 This repository contains a simple bot project that interacts with users. The bot is designed to perform specific tasks and respond to user inputs.
 
 ### Files
-- **commands.gs**: This file contains the command handlers for the bot.
+- **commands.gs**: This file contains the command handlers for the bot, including `/start`, `/zumbido`, `/sumarme`, and `/reporte`.
 - **bot_simple.gs**: This is the main script that contains the bot's logic and functionality.
 - **README.md**: This file provides an overview of the project and its contents.
 
@@ -23,6 +23,12 @@ This repository contains a simple bot project that interacts with users. The bot
    ```bash
    node main.gs
    ```
+
+## Commands
+- `/start`: Iniciar el bot.
+- `/zumbido`: Enviar un reconocimiento.
+- `/sumarme`: Para expresar +1.
+- `/reporte`: Historial de reconocimientos.
 
 ## License
 This project is licensed under the MIT License.

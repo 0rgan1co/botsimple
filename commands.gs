@@ -1,60 +1,19 @@
-// Configuración global
-var token = "7719314719:AAHgdp9YdKkPKN9bziUVPDop8csZfoRjqPM";
-var chatId = "-4687334611";  // Reemplaza con el ID correcto del chat
-
-/**
- * Maneja el comando /start
- * @param {number} chatId - ID del chat de Telegram.
- */
-function handleStartCommand(chatId) {
-  var chatId = "-4687334611";  // Reemplaza con el ID correcto del chat
-  var texto = `
-🐝 <b>¡Hola!</b> ✨
-
-En este chat podés <b>dar y recibir</b> reconocimientos y auto-reconocimientos generando un <b>✨ zumbido ✨</b> que quedara registrado en "BeeZum 🐝" para que el equipo pueda utilizarlo como ayuda memoria de sus interacciones cotidianas. Cada zumbido quedará abierto por 48 horas para que otras personas puedan <b>celebrar</b> y sumarse a ese reconocimiento.  
-
-🌱 <b>Creemos que el reconocimiento es una forma de nutrir la conexión, los vínculos y hacer visible lo que contribuye a nuestro bienestar y la colaboración.</b>
-
-<b>Comandos disponibles:</b>
-/start - Iniciar el bot
-/zumbido - Enviar un reconocimiento
-/sumarme - Para expresar +1 
-/reporte - Historial de reconocimientos
-`;
-
-  var url = "https://api.telegram.org/bot" + token + "/sendMessage";
-  var options = {
-    method: "post",
-    payload: {
-      chat_id: chatId,
-      text: texto,
-      parse_mode: "HTML"
-    }
-  };
-
-  UrlFetchApp.fetch(url, options);
+function handleZumbido(chatId) {
+  sendText(chatId, "🐝 <b>¡Hola!</b> ✨\n\nEn este chat podés <b>dar y recibir</b> reconocimientos y auto-reconocimientos generando un <b>✨ zumbido ✨</b> que quedara registrado en \"BeeZum 🐝\"\n\nCada zumbido quedará abierto por 48 horas para que otras personas puedan <b>celebrar</b> y <b>sumarse +1</b> a ese reconocimiento.\n\n🌱 <b>Sabemos que es un gran desafío navegar la tensión entre conexión y eficiencia. Por esta razón quedemos generar condiciones apoyantes para que existe más reconocimiento en los equipos.</b>\n\n¿Qué puedo hacer?\n/start - Iniciar el bot\n/zumbido - Dar un reconocimiento\n/sumarme - Sumarme +1\n/reporte - Ver historial");
 }
 
-/**
- * Maneja el comando /zumbido
- * @param {number} chatId - ID del chat de Telegram.
- */
-function handleZumbidoCommand(chatId) {
-  sendText(chatId, "Estamos trabajando para que la funcionalidad /zumbido este disponible pronto 🐝.");
+function handleSumarme(chatId) {
+  sendText(chatId, "¡Te has sumado +1! 🎉");
 }
 
-/**
- * Maneja el comando /sumarme
- * @param {number} chatId - ID del chat de Telegram.
- */
-function handleSumarmeCommand(chatId) {
-    sendText(chatId, "Estamos trabajando para que la funcionalidad /sumarme este disponible pronto.");
+function handleReporte(chatId) {
+  sendText(chatId, "Aquí está tu historial de reconocimientos...");
 }
 
-/**
- * Maneja el comando /reporte
- * @param {number} chatId - ID del chat de Telegram.
- */
-function handleReporteCommand(chatId) {
-    sendText(chatId, "Estamos trabajando para que la funcionalidad /reporte este disponible pronto 🐝.");
+function handleAyuda(chatId) {
+  sendText(chatId, "Estas son las cosas que puedo hacer...\n- /zumbido: Dar un reconocimiento\n- /sumarme: Sumarme +1\n- /reporte: Ver historial");
+}
+
+function handleStart(chatId) {
+  sendText(chatId, "¡Bienvenido! Usa /ayuda para ver los comandos disponibles.");
 }
