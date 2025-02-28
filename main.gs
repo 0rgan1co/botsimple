@@ -18,7 +18,7 @@ function testSendText(){
   sendText(CHAT_ID, "Probando SendText", { "remove_keyboard": true })
 }
 
-function sendText(chatId, text, keyboard) {
+function backupsendText(chatId, text, keyboard) {
   var data = {
     method: "post",
     payload: {
@@ -33,7 +33,41 @@ function sendText(chatId, text, keyboard) {
   SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(LOGS_SHEET).appendRow([new Date(), data]);
 }
 
-function backupDoPost() {
+// Función para enviar mensajes
+function sendText(chatId, text, keyboard) {
+  try {
+    var payload = {
+      method: "sendMessage",
+      chat_id: String(chatId),
+      text: text,
+      parse_mode: "HTML"
+    };
+
+    if (keyboard) {
+      payload.reply_markup = JSON.stringify(keyboard);
+    }
+
+    var data = {
+      method: "post",
+      payload: payload,
+      muteHttpExceptions: true // Habilita esta opción para ver errores completos
+    };
+
+    var response = UrlFetchApp.fetch(TELEGRAM_URL + '/', data);
+    var responseData = JSON.parse(response.getContentText());
+
+    if (!responseData.ok) {
+      throw new Error("Error de Telegram: " + responseData.description);
+    }
+
+    return true;
+  } catch (error) {
+    Logger.log("Error enviando mensaje: " + error.toString());
+    return false;
+  }
+}
+
+function backupSimpleDoPost() {
   if (!e || !e.postData) {
     return;
   }
@@ -49,7 +83,7 @@ function backupDoPost() {
 
 function doPost(e) {
   if (!e || !e.postData) {
-    Logger.log("No recibi ningun evento.");
+    Logger.log("No recibí ningún evento.");
     return;
   }
 
@@ -61,38 +95,53 @@ function doPost(e) {
     return;
   }
 
-  var text = contents.message.text;
-  var chatId = contents.message.chat.id;
-
-  // Log chatId and incoming message to the spreadsheet
-  try {
-    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(LOGS_SHEET).appendRow([new Date(), chatId + text]);
-  } catch (error) {
-    Logger.log("Error escribiendo en spreadsheet: " + error);
+  // Verificar si tenemos un mensaje con texto
+  if (!contents.message || !contents.message.text) {
+    Logger.log("No hay mensaje de texto en el evento recibido.");
     return;
   }
 
-  Logger.log("Texto recibido: " + text); // Log the incoming text
-  if (contents.message.text.slice(0, COMMANDS[0].length) == COMMANDS[0]){
-  SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(LOGS_SHEET).appendRow([new Date(),"Entramos a Zumbido"]);
+  var text = contents.message.text.trim(); // Eliminar espacios en blanco al inicio y final
+  var chatId = contents.message.chat.id;
 
+  // Log el chatId y el mensaje en la hoja de cálculo
+  try {
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(LOGS_SHEET).appendRow([new Date(), chatId, text]);
+  } catch (error) {
+    Logger.log("Error escribiendo en la hoja de cálculo: " + error);
+    return;
+  }
+
+  Logger.log("Texto recibido: " + text);
+
+  // Verificar el estado del usuario
+  if (userStates[chatId]) {
+    // Si el usuario está en un estado intermedio, procesar la respuesta según el flujo
+    switch (userStates[chatId].step) {
+      case "awaitingRecipient":
+        processRecipient(chatId, text);
+        break;
+      case "awaitingCategory":
+        processCategory(chatId, text);
+        break;
+      case "awaitingDescription":
+        processDescription(chatId, text);
+        break;
+      default:
+        sendText(chatId, "❌ Estado no reconocido. Usa /ayuda para ver las opciones disponibles.");
+        delete userStates[chatId]; // Limpiar el estado
+        break;
     }
-      // Log if no command matched
-  Logger.log("No command matched for text: " + text);
+  } else {
+    // Si no hay estado, procesar como un comando normal
+    var command = text.split(" ")[0]; // Obtener el primer término (comando)
+    if (commandHandlers[command]) {
+      // Si el comando existe en el mapeo, ejecutar el handler correspondiente
+      commandHandlers[command](chatId);
+    } else {
+      // Si no coincide con ningún comando, enviar un mensaje de ayuda
+      sendText(chatId, "No reconozco ese comando. Usa /ayuda para ver las opciones disponibles.");
+    }
+  }
 }
-
-    // if (contents.message.text.slice(0, COMMANDS[0].length) == COMMANDS[0]){
-    // SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(LOGS_SHEET).appendRow([new Date(),"Entramos a Zumbido"]);
-    // sendText(contents.message.chat.id, "Te damos la bienvenida a BeeZum! Utiliza /ayuda para saber que puedo hacer.", { "remove_keyboard": true });
-    //} else if (text === "/ayuda") {
-    //  sendText(contents.message.chat.id, "Estas son las cosas que puedo hacer...", { "remove_keyboard": true });
-   // } 
-  // Agregar otros comandos 
-  // else {
-    // Ignorar otros mensajes
- //   return;
- // }
-  // Logs de los mensajes en excel
- // SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(LOGS_SHEET).appendRow([new Date(), text]);
-
 
